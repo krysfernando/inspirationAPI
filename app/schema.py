@@ -11,6 +11,11 @@ class UserRead(BaseModel):
     id: int
     username: str
 
+class CategoryBase(BaseModel):
+    category_name: str
+
+    model_config = ConfigDict(from_attributes=True) 
+
 class SuccessResponse(BaseModel):
     message: str
     data: str
