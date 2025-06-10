@@ -12,14 +12,14 @@ class User(Base):
 class Category(Base):
     __tablename__ = "categories"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    category_name: Mapped[str] = mapped_column(String(50), unique=True)
+    category_name: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
 
     messages = relationship("Message", back_populates="category")
 
 class Message(Base):
     __tablename__ = "messages"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    message: Mapped[str] = mapped_column(String(255))
+    message: Mapped[str] = mapped_column(String(255), nullable=False)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))  # Add ForeignKey
     category_id: Mapped[int] = mapped_column(Integer, ForeignKey("categories.id"))  # Add ForeignKey
 

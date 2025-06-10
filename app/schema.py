@@ -23,6 +23,12 @@ class MessageBase(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+class MessageUpdate(BaseModel):
+    message: str
+    category_id: int
+
+    model_config = ConfigDict(from_attributes=True)
+
 class SuccessResponse(BaseModel):
     message: str
     data: str
