@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy import select, desc
 from app.models import Message, Category, User
-from app.schema import MessageBase, SuccessResponse, ErrorResponse
+from app.schema import MessageBase, MessageUpdate, SuccessResponse, ErrorResponse
 from app.responses import success_message, internal_error, not_found
 from app.database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -87,6 +88,40 @@ async def get_messages(db: AsyncSession = Depends(get_db)):
     if not messages:
         return {'message': 'No messages found'}
     return messages
+
+
+@message.patch(
+    "/messages/{user_id}",
+    status_code=status.HTTP_200_OK,
+    responses={
+        400: {"model": ErrorResponse, "description": "Bad Request"},
+        404: {"model": ErrorResponse, "description": "Message not found"},
+        500: {"model": ErrorResponse, "description": "Internal Server Error"},
+    },
+    summary="Update a message",
+    description="Updates a user's message by ID and returns a status message.",
+    tags=["Message"],
+)
+async def update_message(message_id: int, message_in: MessageUpdate, db: AsyncSession = Depends(get_db)):
+    
+    db_message = await db.get(Message, message_id)
+    db_category = await db.get(Category, message_in.category_id)
+    
+    if db_category is None:
+        raise not_found("Category")
+    
+    # Only update allowed fields
+    db_message.message = message_in.message
+    db_message.category_id = message_in.category_id
+
+    try:
+        await db.commit()
+        await db.refresh(db_message)
+    except Exception:
+        await db.rollback()
+        raise internal_error()
+    return success_message("updated", "Message")
+
 
 
 @message.delete(
