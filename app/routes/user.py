@@ -23,7 +23,7 @@ user = APIRouter()
 )
 async def create_user(user: UserBase, db: AsyncSession = Depends(get_db)):
     new_username = User(
-        username=user.username
+        username = (user.username).lower()
         )
     
     db.add(new_username)
